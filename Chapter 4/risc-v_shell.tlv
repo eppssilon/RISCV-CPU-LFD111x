@@ -100,7 +100,12 @@
    
    $is_add  = $dec_bits == 11'b0_000_0110011;
    
-   // RF signals
+   // ALU
+   $result[31:0] =
+       $is_addi ? $src1_value + $imm :
+       $is_add  ? $src1_value + $src2_value :
+                  32'b0;
+   
    
    
    // Bogus use
