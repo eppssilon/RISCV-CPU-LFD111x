@@ -44,7 +44,9 @@
    $reset = *reset;
    
    // PC 
-   $next_pc[31:0] = $reset ? 32'd0 : $pc + 32'd4;
+   $next_pc[31:0] = $reset    ? 32'd0 :
+                    $taken_br ? $br_tgt_pc :
+                                $pc + 32'd4;
    $pc[31:0] = >>1$next_pc;
    
    // IMEM (Implementing from macro, readonly)
@@ -107,6 +109,15 @@
        $is_add  ? $src1_value + $src2_value :
                   32'b0;
    
+   // Branch Logic
+   $taken_br = $is_beq  ? ( $src1_value == $src2_value) :
+               $is_bne  ? ( $src1_value != $src2_value) :
+               $is_blt  ? (($src1_value <  $src2_value) ^ ($src1_value[31] != $src2_value[31])) :
+               $is_bge  ? (($src1_value >= $src2_value) ^ ($src1_value[31] != $src2_value[31])) :
+               $is_bltu ? ( $src1_value <  $src2_value) :
+               $is_bgeu ? ( $src1_value >= $src2_value) :
+                          1'b0;
+   $br_tgt_pc[31:0] = $pc + $imm;
    
    // Bogus use
    `BOGUS_USE($rd $imm $rd_valid $rs1 $rs1_valid $imm_valid $rs2_valid $rs2 $opcode $is_i_instr $funct3_valid $funct3
